@@ -1,0 +1,22 @@
+/* 修改 Logo 樣式，增加動態漸層 */
+.logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #ec4899, #6366f1);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+    to { background-position: 200% center; }
+}
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px; /* 限制內容寬度 */
+    margin: 0 auto;    /* 內容水平居中 */
+    padding: 0 1rem;   /* 增加一點左右內距防止文字貼邊 */
+}
+
