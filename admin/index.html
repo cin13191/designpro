@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>極秒創意 管理後台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+            --text: #374151;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+            background: var(--light);
+            color: var(--text);
+        }
+
+        /* ===== LAYOUT ===== */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-logo {
+            padding: 0 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu li:hover,
+        .sidebar-menu li.active {
+            border-left-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 1rem 2rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .sidebar-menu li:hover a,
+        .sidebar-menu li.active a {
+            color: white;
+        }
+
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        /* ===== HEADER ===== */
+        .admin-header {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            color: var(--dark);
+        }
+
+        .admin-header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-profile:hover {
+            background: var(--border);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-button:hover {
+            color: var(--primary);
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* ===== DASHBOARD GRID ===== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-box.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-box.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-box.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-label {
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* ===== TABLES ===== */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--light);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5558e3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        /* ===== FORMS ===== */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 999;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+
+        /* ===== HIDDEN SECTIONS ===== */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">極秒創意</div>
+            <ul class="sidebar-menu">
+                <li class="active" onclick="switchTab('dashboard')">
+                    <a href="#dashboard">📊 儀表板</a>
+                </li>
+                <li onclick="switchTab('orders')">
+                    <a href="#orders">📋 訂單管理</a>
+                </li>
+                <li onclick="switchTab('projects')">
+                    <a href="#projects">🎨 項目管理</a>
+                </li>
+                <li onclick="switchTab('portfolio')">
+                    <a href="#portfolio">🖼️ 作品集</a>
+                </li>
+                <li onclick="switchTab('clients')">
+                    <a href="#clients">👥 客戶管理</a>
+                </li>
+                <li onclick="switchTab('messages')">
+                    <a href="#messages">💬 訊息</a>
+                </li>
+                <li onclick="switchTab('settings')">
+                    <a href="#settings">⚙️ 設置</a>
+                </li>
+                <li style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                    <a href="/" style="color: #fca5a5;">← 返回前台</a>
+                </li>
+                <li>
+                    <a href="#" onclick="logout()" style="color: #fca5a5;">登出</a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="admin-header">
+                <h1>管理後台</h1>
+                <div class="admin-header-right">
+                    <div class="user-profile">
+                        <div class="avatar">A</div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--dark);">管理員</div>
+                            <div style="font-size: 0.85rem; color: var(--text);">admin@極秒創意.com</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">本月訂單</div>
+                        <div class="stat-value">24</div>
+                    </div>
+                    <div class="stat-box success">
+                        <div class="stat-label">已完成訂單</div>
+                        <div class="stat-value">18</div>
+                    </div>
+                    <div class="stat-box warning">
+                        <div class="stat-label">進行中項目</div>
+                        <div class="stat-value">6</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-label">待完成項目</div>
+                        <div class="stat-value">3</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">最近訂單</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>訂單編號</th>
+                                    <th>客戶名稱</th>
+                                    <th>服務項目</th>
+                                    <th>狀態</th>
+                                    <th>金額</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#ORD-2024-001</td>
+                                    <td>ABC科技有限公司</td>
+                                    <td>品牌設計</td>
+                                    <td><span class="badge badge-completed">已完成</span></td>
+                                    <td>¥19,999</td>
+                                    <td><button class="btn btn-secondary" style="font-size: 0.85rem;">查看</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-2024-002</td>
+                                    <td>新鮮食品公司</td>
+                                    <td>包裝設計</td>
+                                    <td><span class="badge badge-pending">進行中</span></td>
+                                    <td>¥9,999</td>
+                                    <td><button class="btn btn-secondary" style="font-size: 0.85rem;">查看</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-2024-003</td>
+                                    <td>電商平台有限公司</td>
+                                    <td>App UI設計</td>
+                                    <td><span class="badge badge-pending">進行中</span></td>
+                                    <td>¥14,999</td>
+                                    <td><button class="btn btn-secondary" style="font-size: 0.85rem;">查看</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders" class="tab-content">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 class="card-title" style="margin: 0;">訂單管理</h3>
+                        <button class="btn btn-primary" onclick="openModal('addOrderModal')">+ 新增訂單</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>訂單編號</th>
+                                    <th>客戶</th>
+                                    <th>服務</th>
+                                    <th>金額</th>
+                                    <th>狀態</th>
+                                    <th>交稿期限</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#ORD-2024-004</td>
+                                    <td>王女士</td>
+                                    <td>海報設計</td>
+                                    <td>¥2,999</td>
+                                    <td><span class="badge badge-success">待發貨</span></td>
+                                    <td>2024-04-15</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem; margin-right: 0.5rem;">編輯</button>
+                                        <button class="btn btn-danger">刪除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-2024-005</td>
+                                    <td>李先生</td>
+                                    <td>名片設計</td>
+                                    <td>¥999</td>
+                                    <td><span class="badge badge-completed">已完成</span></td>
+                                    <td>2024-04-10</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem; margin-right: 0.5rem;">編輯</button>
+                                        <button class="btn btn-danger">刪除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Tab -->
+            <div id="projects" class="tab-content">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 class="card-title" style="margin: 0;">項目進度管理</h3>
+                        <button class="btn btn-primary" onclick="openModal('addProjectModal')">+ 新增項目</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>項目名稱</th>
+                                    <th>客戶</th>
+                                    <th>開始日期</th>
+                                    <th>截止日期</th>
+                                    <th>進度</th>
+                                    <th>負責設計師</th>
+                                    <th>狀態</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ABC品牌VI系統</td>
+                                    <td>ABC科技</td>
+                                    <td>2024-03-01</td>
+                                    <td>2024-04-15</td>
+                                    <td>
+                                        <div style="width: 100px; height: 8px; background: var(--light); border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 80%; height: 100%; background: var(--success);"></div>
+                                        </div>
+                                    </td>
+                                    <td>李設計師</td>
+                                    <td><span class="badge badge-pending">進行中</span></td>
+                                </tr>
+                                <tr>
+                                    <td>新鮮食品包裝設計</td>
+                                    <td>新鮮食品</td>
+                                    <td>2024-03-10</td>
+                                    <td>2024-04-20</td>
+                                    <td>
+                                        <div style="width: 100px; height: 8px; background: var(--light); border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 60%; height: 100%; background: var(--warning);"></div>
+                                        </div>
+                                    </td>
+                                    <td>王設計師</td>
+                                    <td><span class="badge badge-pending">進行中</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Tab -->
+            <div id="portfolio" class="tab-content">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 class="card-title" style="margin: 0;">作品集管理</h3>
+                        <button class="btn btn-primary" onclick="openModal('addPortfolioModal')">+ 新增作品</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>作品標題</th>
+                                    <th>分類</th>
+                                    <th>客戶</th>
+                                    <th>發布日期</th>
+                                    <th>瀏覽次數</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ABC科技品牌VI</td>
+                                    <td>品牌設計</td>
+                                    <td>ABC科技</td>
+                                    <td>2024-03-15</td>
+                                    <td>234</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem; margin-right: 0.5rem;">編輯</button>
+                                        <button class="btn btn-danger">刪除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>食品包裝設計系列</td>
+                                    <td>包裝設計</td>
+                                    <td>新鮮食品</td>
+                                    <td>2024-03-10</td>
+                                    <td>512</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem; margin-right: 0.5rem;">編輯</button>
+                                        <button class="btn btn-danger">刪除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clients Tab -->
+            <div id="clients" class="tab-content">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 class="card-title" style="margin: 0;">客戶管理</h3>
+                        <button class="btn btn-primary" onclick="openModal('addClientModal')">+ 新增客戶</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>客戶名稱</th>
+                                    <th>聯繫人</th>
+                                    <th>電話</th>
+                                    <th>郵箱</th>
+                                    <th>合作次數</th>
+                                    <th>總支出</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ABC科技有限公司</td>
+                                    <td>陳先生</td>
+                                    <td>02-1234-5678</td>
+                                    <td>chen@abc.com</td>
+                                    <td>3</td>
+                                    <td>¥54,997</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem; margin-right: 0.5rem;">編輯</button>
+                                        <button class="btn btn-danger">刪除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>新鮮食品公司</td>
+                                    <td>李女士</td>
+                                    <td>02-9876-5432</td>
+                                    <td>li@fresh.com</td>
+                                    <td>2</td>
+                                    <td>¥24,998</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem; margin-right: 0.5rem;">編輯</button>
+                                        <button class="btn btn-danger">刪除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div id="messages" class="tab-content">
+                <div class="card">
+                    <h3 class="card-title">訊息中心</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>發件人</th>
+                                    <th>標題</th>
+                                    <th>發送時間</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>客戶 - 陳先生</td>
+                                    <td>關於ABC品牌項目的修改意見</td>
+                                    <td>今天 14:30</td>
+                                    <td><span class="badge badge-pending">未讀</span></td>
+                                    <td><button class="btn btn-secondary" style="font-size: 0.85rem;">回覆</button></td>
+                                </tr>
+                                <tr>
+                                    <td>客戶 - 李女士</td>
+                                    <td>包裝設計稿件確認</td>
+                                    <td>昨天 10:15</td>
+                                    <td><span class="badge badge-success">已讀</span></td>
+                                    <td><button class="btn btn-secondary" style="font-size: 0.85rem;">查看</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="card">
+                    <h3 class="card-title">網站設置</h3>
+                    <form>
+                        <div class="form-group">
+                            <label>公司名稱</label>
+                            <input type="text" value="極秒創意 平面設計接案">
+                        </div>
+                        <div class="form-group">
+                            <label>公司簡介</label>
+                            <textarea>我們是台灣頂尖的平面設計接案團隊，為超過1000家企業提供專業設計服務。</textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>聯繫電話</label>
+                                <input type="tel" value="+886-2-1234-5678">
+                            </div>
+                            <div class="form-group">
+                                <label>信箱地址</label>
+                                <input type="email" value="info@極秒創意.com.tw">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Facebook</label>
+                                <input type="text" value="https://facebook.com/極秒創意">
+                            </div>
+                            <div class="form-group">
+                                <label>Instagram</label>
+                                <input type="text" value="https://instagram.com/極秒創意">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存設置</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="addOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增訂單</h2>
+                <button class="modal-close" onclick="closeModal('addOrderModal')">✕</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>客戶名稱</label>
+                    <input type="text" placeholder="輸入客戶名稱">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>服務項目</label>
+                        <select>
+                            <option>品牌設計</option>
+                            <option>海報設計</option>
+                            <option>包裝設計</option>
+                            <option>VI設計</option>
+                            <option>名片設計</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>金額</label>
+                        <input type="number" placeholder="¥">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>交稿期限</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>狀態</label>
+                        <select>
+                            <option>待發貨</option>
+                            <option>進行中</option>
+                            <option>已完成</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">創建訂單</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增項目</h2>
+                <button class="modal-close" onclick="closeModal('addProjectModal')">✕</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>項目名稱</label>
+                    <input type="text" placeholder="輸入項目名稱">
+                </div>
+                <div class="form-group">
+                    <label>客戶名稱</label>
+                    <input type="text" placeholder="輸入客戶名稱">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>開始日期</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>截止日期</label>
+                        <input type="date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>負責設計師</label>
+                    <select>
+                        <option>李設計師</option>
+                        <option>王設計師</option>
+                        <option>陳設計師</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">創建項目</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addPortfolioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增作品</h2>
+                <button class="modal-close" onclick="closeModal('addPortfolioModal')">✕</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>作品標題</label>
+                    <input type="text" placeholder="輸入作品標題">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>分類</label>
+                        <select>
+                            <option>品牌設計</option>
+                            <option>海報設計</option>
+                            <option>包裝設計</option>
+                            <option>VI設計</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>客戶名稱</label>
+                        <input type="text" placeholder="輸入客戶名稱">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>作品描述</label>
+                    <textarea placeholder="詳細描述這個設計作品..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>上傳圖片</label>
+                    <input type="file" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">發布作品</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addClientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增客戶</h2>
+                <button class="modal-close" onclick="closeModal('addClientModal')">✕</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>客戶名稱</label>
+                    <input type="text" placeholder="公司名稱">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>聯繫人</label>
+                        <input type="text" placeholder="聯繫人名稱">
+                    </div>
+                    <div class="form-group">
+                        <label>職位</label>
+                        <input type="text" placeholder="職位">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>電話</label>
+                        <input type="tel" placeholder="02-1234-5678">
+                    </div>
+                    <div class="form-group">
+                        <label>郵箱</label>
+                        <input type="email" placeholder="email@example.com">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">添加客戶</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.sidebar-menu li').forEach(li => {
+                li.classList.remove('active');
+            });
+
+            // Show selected tab
+            const tab = document.getElementById(tabName);
+            if (tab) {
+                tab.classList.add('active');
+            }
+
+            // Update sidebar
+            event.target.closest('li').classList.add('active');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('確定要登出嗎？')) {
+                alert('已登出，返回登錄頁面');
+                window.location.href = '/login';
+            }
+        }
+
+        console.log('Admin Panel Loaded');
+    </script>
+</body>
+</html>
